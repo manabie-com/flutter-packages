@@ -18,6 +18,9 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.plugins.webviewflutter.GeneratedAndroidWebView.WebChromeClientHostApi;
 import java.util.Objects;
+import android.content.Context;
+import android.webkit.ValueCallback;
+import android.net.Uri;
 
 /**
  * Host api implementation for {@link WebChromeClient}.
@@ -56,23 +59,29 @@ public class WebChromeClientHostApiImpl implements WebChromeClientHostApi {
         WebView webView,
         ValueCallback<Uri[]> filePathCallback,
         FileChooserParams fileChooserParams) {
-      final boolean currentReturnValueForOnShowFileChooser = returnValueForOnShowFileChooser;
-      flutterApi.onShowFileChooser(
-          this,
-          webView,
-          fileChooserParams,
-          reply -> {
-            // The returned list of file paths can only be passed to `filePathCallback` if the
-            // `onShowFileChooser` method returned true.
-            if (currentReturnValueForOnShowFileChooser) {
-              final Uri[] filePaths = new Uri[reply.size()];
-              for (int i = 0; i < reply.size(); i++) {
-                filePaths[i] = Uri.parse(reply.get(i));
-              }
-              filePathCallback.onReceiveValue(filePaths);
-            }
-          });
-      return currentReturnValueForOnShowFileChooser;
+//      final boolean currentReturnValueForOnShowFileChooser = returnValueForOnShowFileChooser;
+//      flutterApi.onShowFileChooser(
+//          this,
+//          webView,
+//          fileChooserParams,
+//          reply -> {
+//            // The returned list of file paths can only be passed to `filePathCallback` if the
+//            // `onShowFileChooser` method returned true.
+//            if (currentReturnValueForOnShowFileChooser) {
+//              final Uri[] filePaths = new Uri[reply.size()];
+//              for (int i = 0; i < reply.size(); i++) {
+//                filePaths[i] = Uri.parse(reply.get(i));
+//              }
+//              filePathCallback.onReceiveValue(filePaths);
+//            }
+//          });
+//      return currentReturnValueForOnShowFileChooser;
+
+      final Context context = webView.getContext();
+      final String title = context.getResources().getString(R.string.webview_file_chooser_title);
+      final String type = context.getResources().getString(R.string.webview_file_chooser_type);
+      new FileChooserLauncher(context, title, type, true, filePathCallback).start();
+      return true;
     }
 
     /** Sets return value for {@link #onShowFileChooser}. */
