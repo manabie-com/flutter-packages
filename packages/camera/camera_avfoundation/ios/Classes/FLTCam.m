@@ -144,6 +144,32 @@ NSString *const errorMethod = @"error";
   // https://github.com/flutter/plugins/pull/4520#discussion_r766335637
   _maxStreamingPendingFramesCount = 4;
 
+
+    //Hanlde bluetooth connection
+      BOOL test =  [self isBluetoothHeadsetConnected];
+      NSLog(test ? @"bluetooth connected" : @"bluetooth disconnected");
+      if(test) {
+          audioCaptureSession.usesApplicationAudioSession = true;
+          audioCaptureSession.automaticallyConfiguresApplicationAudioSession = false;
+          if (@available(iOS 10.0, *)) {
+              [[AVAudioSession sharedInstance]
+               setCategory:AVAudioSessionCategoryPlayAndRecord withOptions:AVAudioSessionCategoryOptionAllowBluetoothA2DP error:nil];
+          } else {
+              // Fallback on earlier versions
+              [[AVAudioSession sharedInstance]
+               setCategory:AVAudioSessionCategoryPlayAndRecord withOptions:AVAudioSessionCategoryOptionAllowBluetooth error:nil];
+          }
+      } else {
+          [AVAudioSession sharedInstance];
+      }
+
+      [[AVAudioSession sharedInstance] setActive: YES error:nil];
+      [[NSNotificationCenter defaultCenter] addObserver:self
+                                               selector:@selector(routeChange:)
+                                                   name:AVAudioSessionRouteChangeNotification
+                                                 object:nil];
+
+
   NSError *localError = nil;
   AVCaptureConnection *connection = [self createConnection:&localError];
   if (localError) {
@@ -193,6 +219,48 @@ NSString *const errorMethod = @"error";
 
   return connection;
 }
+
+- (void)routeChange:(NSNotification*)notification {
+
+NSDictionary *interuptionDict = notification.userInfo;
+
+NSInteger routeChangeReason = [[interuptionDict valueForKey:AVAudioSessionRouteChangeReasonKey] integerValue];
+
+switch (routeChangeReason) {
+    case AVAudioSessionRouteChangeReasonUnknown:
+        NSLog(@"routeChangeReason : AVAudioSessionRouteChangeReasonUnknown");
+        break;
+
+    case AVAudioSessionRouteChangeReasonNewDeviceAvailable:
+        // a headset was added or removed
+        NSLog(@"routeChangeReason : AVAudioSessionRouteChangeReasonNewDeviceAvailable");
+        break;
+
+    case AVAudioSessionRouteChangeReasonOldDeviceUnavailable:
+        // a headset was added or removed
+        NSLog(@"routeChangeReason : AVAudioSessionRouteChangeReasonOldDeviceUnavailable");
+        break;
+
+    case AVAudioSessionRouteChangeReasonCategoryChange:
+        // called at start - also when other audio wants to play
+        NSLog(@"routeChangeReason : AVAudioSessionRouteChangeReasonCategoryChange");//AVAudioSessionRouteChangeReasonCategoryChange
+        break;
+
+    case AVAudioSessionRouteChangeReasonOverride:
+        NSLog(@"routeChangeReason : AVAudioSessionRouteChangeReasonOverride");
+        break;
+
+    case AVAudioSessionRouteChangeReasonWakeFromSleep:
+        NSLog(@"routeChangeReason : AVAudioSessionRouteChangeReasonWakeFromSleep");
+        break;
+
+    case AVAudioSessionRouteChangeReasonNoSuitableRouteForCategory:
+        NSLog(@"routeChangeReason : AVAudioSessionRouteChangeReasonNoSuitableRouteForCategory");
+        break;
+
+    default:
+        break;
+} }
 
 - (void)start {
   [_videoCaptureSession startRunning];
@@ -524,6 +592,7 @@ NSString *const errorMethod = @"error";
 
       _lastVideoSampleTime = currentSampleTime;
 
+
       CVPixelBufferRef nextBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
       CMTime nextSampleTime = CMTimeSubtract(_lastVideoSampleTime, _videoTimeOffset);
       [_videoAdaptor appendPixelBuffer:nextBuffer withPresentationTime:nextSampleTime];
@@ -624,6 +693,8 @@ NSString *const errorMethod = @"error";
   for (AVCaptureOutput *output in [_audioCaptureSession outputs]) {
     [_audioCaptureSession removeOutput:output];
   }
+    NSLog(@"Audio session stop");
+  [[AVAudioSession sharedInstance] setActive:NO error:nil];
 }
 
 - (void)dealloc {
@@ -1078,6 +1149,20 @@ NSString *const errorMethod = @"error";
 
 - (CGFloat)getMaxAvailableZoomFactor {
   return _captureDevice.maxAvailableVideoZoomFactor;
+}
+
+- (BOOL)isBluetoothHeadsetConnected {
+
+    BOOL available = NO;
+    AVAudioSessionRouteDescription* route = [[AVAudioSession sharedInstance] currentRoute];
+    for (AVAudioSessionPortDescription* desc in [route outputs]) {
+        NSLog(@"portType %@",desc);
+        if ([[desc portType] isEqualToString:@"BluetoothA2DPOutput"])
+            available = YES;
+            break;
+    }
+    return available;
+
 }
 
 - (BOOL)setupWriterForPath:(NSString *)path {
