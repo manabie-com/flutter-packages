@@ -73,6 +73,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
+import com.coremedia.iso.IsoFile;
+import com.coremedia.iso.boxes.Container;
+import com.coremedia.iso.boxes.TimeToSampleBox;
+import com.coremedia.iso.boxes.TrackBox;
+import com.googlecode.mp4parser.DataSource;
+import com.googlecode.mp4parser.FileDataSourceImpl;
+import com.googlecode.mp4parser.authoring.Movie;
+import com.googlecode.mp4parser.authoring.Mp4TrackImpl;
+import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+
 @FunctionalInterface
 interface ErrorCallback {
   void onError(String errorCode, String errorMessage);
@@ -149,6 +161,8 @@ class Camera
   private CameraCaptureProperties captureProps;
 
   private MethodChannel.Result flutterResult;
+
+  private String mFilePath;
 
   /** A CameraDeviceWrapper implementation that forwards calls to a CameraDevice. */
   private class DefaultCameraDeviceWrapper implements CameraDeviceWrapper {
@@ -783,24 +797,74 @@ class Camera
     }
     // Re-create autofocus feature so it's using continuous capture focus mode now.
     cameraFeatures.setAutoFocus(
-        cameraFeatureFactory.createAutoFocusFeature(cameraProperties, false));
+            cameraFeatureFactory.createAutoFocusFeature(cameraProperties, false));
     recordingVideo = false;
     try {
       closeRenderer();
       captureSession.abortCaptures();
-      mediaRecorder.stop();
+      if(mediaRecorder != null) {
+        mediaRecorder.stop();
+        mediaRecorder.release();
+        mediaRecorder = null;
+      }
     } catch (CameraAccessException | IllegalStateException e) {
       // Ignore exceptions and try to continue (changes are camera session already aborted capture).
     }
-    mediaRecorder.reset();
     try {
-      startPreview();
-    } catch (CameraAccessException | IllegalStateException | InterruptedException e) {
+//      startPreview();
+      String manufacturer = android.os.Build.MANUFACTURER;
+      if (manufacturer.equals("samsung")) {
+        parseVideo(this.mFilePath, result);
+      } else {
+        result.success(captureFile.getAbsolutePath());
+        captureFile = null;
+      }
+    } catch (Exception e) {
       result.error("videoRecordingFailed", e.getMessage(), null);
       return;
     }
-    result.success(captureFile.getAbsolutePath());
-    captureFile = null;
+  }
+
+  private void parseVideo(String mFilePath, @NonNull final Result result) {
+    try {
+      DataSource channel = new FileDataSourceImpl(mFilePath);
+      IsoFile isoFile = new IsoFile(channel);
+      List<TrackBox> trackBoxes = isoFile.getMovieBox().getBoxes(TrackBox.class);
+      boolean isError = false;
+      for (TrackBox trackBox : trackBoxes) {
+        TimeToSampleBox.Entry firstEntry = trackBox.getMediaBox().getMediaInformationBox().getSampleTableBox().getTimeToSampleBox().getEntries().get(0);
+        if (firstEntry.getDelta() > 10000) {
+          isError = true;
+          firstEntry.setDelta(3000);
+        }
+      }
+      if (isError) {
+        File file = getOutputMediaFile();
+        String filePath = file.getAbsolutePath();
+        Movie movie = new Movie();
+        for (TrackBox trackBox : trackBoxes) {
+          movie.addTrack(new Mp4TrackImpl(channel.toString() + "[" + trackBox.getTrackHeaderBox().getTrackId() + "]", trackBox));
+        }
+        movie.setMatrix(isoFile.getMovieBox().getMovieHeaderBox().getMatrix());
+        Container out = new DefaultMp4Builder().build(movie);
+
+        FileChannel fc = new RandomAccessFile(filePath, "rw").getChannel();
+        out.writeContainer(fc);
+        fc.close();
+      }
+      result.success(mFilePath);
+      captureFile = null;
+    } catch (IOException e) {
+      result.error("Parsing video failed", e.getMessage(), null);
+    }
+  }
+
+  private File getOutputMediaFile() {
+    File tempFile = new File(mFilePath);
+    if (tempFile.exists()) {
+      tempFile.delete();
+    }
+    return new File(mFilePath);
   }
 
   public void pauseVideoRecording(@NonNull final Result result) {
@@ -1167,6 +1231,7 @@ class Camera
       return;
     }
     try {
+      this.mFilePath = captureFile.getAbsolutePath();
       prepareMediaRecorder(captureFile.getAbsolutePath());
     } catch (IOException e) {
       recordingVideo = false;
