@@ -21,6 +21,7 @@ import io.flutter.embedding.android.FlutterView;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.platform.PlatformView;
 import io.flutter.plugins.webviewflutter.GeneratedAndroidWebView.WebViewHostApi;
+import io.flutter.plugins.webviewflutter.CustomDownloadListener;
 import java.util.Map;
 import java.util.Objects;
 
@@ -354,6 +355,7 @@ public class WebViewHostApiImpl implements WebViewHostApi {
   public void setDownloadListener(Long instanceId, Long listenerInstanceId) {
     final WebView webView = (WebView) instanceManager.getInstance(instanceId);
     webView.setDownloadListener((DownloadListener) instanceManager.getInstance(listenerInstanceId));
+    setCustomDownloadListener(context, webView);
   }
 
   @Override
