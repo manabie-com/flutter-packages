@@ -358,7 +358,7 @@ public class WebViewHostApiImpl implements WebViewHostApi {
   public void setDownloadListener(Long instanceId, Long listenerInstanceId) {
     final WebView webView = (WebView) instanceManager.getInstance(instanceId);
     webView.setDownloadListener((DownloadListener) instanceManager.getInstance(listenerInstanceId));
-    setCustomDownloadListener(context, webView);
+    CustomDownloadListener.setCustomDownloadListener(context, webView);
   }
 
   @Override

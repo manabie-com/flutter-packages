@@ -23,19 +23,21 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
-void setCustomDownloadListener(Context context, WebView webView) {
-    webView.setDownloadListener(new DownloadListener()
-    {
-        public void onDownloadStart(String url,
-                String userAgent,
-                String contentDisposition,
-                String mimetype,
-                long contentLength)
+class CustomDownloadListener {
+    public static void setCustomDownloadListener(Context context, WebView webView) {
+        webView.setDownloadListener(new DownloadListener()
         {
-            Uri uri = Uri.parse(url);
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
-        }
-    });
+            public void onDownloadStart(String url,
+                    String userAgent,
+                    String contentDisposition,
+                    String mimetype,
+                    long contentLength)
+            {
+                Uri uri = Uri.parse(url);
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            }
+        });
+    }
 }
