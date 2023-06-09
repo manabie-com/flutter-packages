@@ -24,6 +24,9 @@ import io.flutter.plugins.webviewflutter.GeneratedAndroidWebView.WebViewHostApi;
 import io.flutter.plugins.webviewflutter.CustomDownloadListener;
 import java.util.Map;
 import java.util.Objects;
+import android.content.Intent;
+import android.net.Uri;
+import android.util.Log;
 
 /**
  * Host api implementation for {@link WebView}.

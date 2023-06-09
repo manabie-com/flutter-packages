@@ -19,6 +19,9 @@ import io.flutter.plugin.platform.PlatformView;
 import io.flutter.plugins.webviewflutter.GeneratedAndroidWebView.WebViewHostApi;
 import java.util.Map;
 import java.util.Objects;
+import android.content.Intent;
+import android.net.Uri;
+import android.util.Log;
 
 void setCustomDownloadListener(Context context, WebView webView) {
     webView.setDownloadListener(new DownloadListener()
