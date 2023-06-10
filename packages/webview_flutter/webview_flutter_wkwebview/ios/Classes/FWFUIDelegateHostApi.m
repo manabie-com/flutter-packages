@@ -82,6 +82,83 @@
                                       }];
   return nil;
 }
+
+- (void)webView:(WKWebView*)webView
+    runJavaScriptAlertPanelWithMessage:(NSString*)message
+                      initiatedByFrame:(WKFrameInfo*)frame
+                     completionHandler:(void (^)(void))completionHandler {
+  UIAlertController* alert =
+      [UIAlertController alertControllerWithTitle:nil
+                                          message:message
+                                   preferredStyle:UIAlertControllerStyleAlert];
+
+  [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"OK", nil)
+                                            style:UIAlertActionStyleCancel
+                                          handler:^(UIAlertAction* action) {
+                                            completionHandler();
+                                          }]];
+
+  UIViewController* _viewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+  [_viewController presentViewController:alert animated:YES completion:nil];
+}
+
+
+- (void)webView:(WKWebView*)webView
+    runJavaScriptConfirmPanelWithMessage:(NSString*)message
+                        initiatedByFrame:(WKFrameInfo*)frame
+                       completionHandler:(void (^)(BOOL result))completionHandler {
+  UIAlertController* alert =
+      [UIAlertController alertControllerWithTitle:nil
+                                          message:message
+                                   preferredStyle:UIAlertControllerStyleAlert];
+
+  [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", nil)
+                                            style:UIAlertActionStyleCancel
+                                          handler:^(UIAlertAction* action) {
+                                            completionHandler(NO);
+                                          }]];
+
+  [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"OK", nil)
+                                            style:UIAlertActionStyleDefault
+                                          handler:^(UIAlertAction* action) {
+                                            completionHandler(YES);
+                                          }]];
+
+  UIViewController* _viewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+  [_viewController presentViewController:alert animated:YES completion:nil];
+}
+
+- (void)webView:(WKWebView*)webView
+    runJavaScriptTextInputPanelWithPrompt:(NSString*)prompt
+                              defaultText:(NSString*)defaultText
+                         initiatedByFrame:(WKFrameInfo*)frame
+                        completionHandler:(void (^)(NSString* result))completionHandler {
+  UIAlertController* alert =
+      [UIAlertController alertControllerWithTitle:nil
+                                          message:prompt
+                                   preferredStyle:UIAlertControllerStyleAlert];
+
+  [alert addTextFieldWithConfigurationHandler:^(UITextField* textField) {
+    textField.placeholder = prompt;
+    textField.secureTextEntry = NO;
+    textField.text = defaultText;
+  }];
+
+  [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", nil)
+                                            style:UIAlertActionStyleCancel
+                                          handler:^(UIAlertAction* action) {
+                                            completionHandler(nil);
+                                          }]];
+
+  [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"OK", nil)
+                                            style:UIAlertActionStyleDefault
+                                          handler:^(UIAlertAction* action) {
+                                            completionHandler([alert.textFields.firstObject text]);
+                                          }]];
+
+  UIViewController* _viewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+  [_viewController presentViewController:alert animated:YES completion:nil];
+}
 @end
 
 @interface FWFUIDelegateHostApiImpl ()
