@@ -114,12 +114,22 @@ class RouteBuilder {
     GlobalKey<NavigatorState> navigatorKey,
     Map<Page<Object?>, GoRouterState> registry,
   ) {
+    List<Page<Object?>>? pages;
+    if (routerNeglect) {
+      Router.neglect(context, () {
+        pages = buildPages(context, matchList, onPopPage, routerNeglect,
+            navigatorKey, registry);
+      });
+    } else {
+      pages = buildPages(
+          context, matchList, onPopPage, routerNeglect, navigatorKey, registry);
+    }
+    assert(pages != null);
     return builderWithNav(
       context,
       _buildNavigator(
         onPopPage,
-        buildPages(context, matchList, onPopPage, routerNeglect, navigatorKey,
-            registry),
+        pages!,
         navigatorKey,
         observers: observers,
       ),
