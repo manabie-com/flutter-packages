@@ -128,12 +128,22 @@ class RouteBuilder {
     // https://github.com/flutter/flutter/issues/126365
     final _PagePopContext pagePopContext =
         _PagePopContext._(onPopPageWithRouteMatch);
+    List<Page<Object?>>? pages;
+    if (routerNeglect) {
+      Router.neglect(context, () {
+        pages = _buildPages(context, matchList, pagePopContext, routerNeglect,
+            navigatorKey, registry);
+      });
+    } else {
+      pages = _buildPages(context, matchList, pagePopContext, routerNeglect,
+          navigatorKey, registry);
+    }
+    assert(pages != null);
     return builderWithNav(
       context,
       _buildNavigator(
         pagePopContext.onPopPage,
-        _buildPages(context, matchList, pagePopContext, routerNeglect,
-            navigatorKey, registry),
+        pages!,
         navigatorKey,
         observers: observers,
         restorationScopeId: restorationScopeId,
