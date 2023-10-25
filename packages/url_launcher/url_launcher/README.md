@@ -1,4 +1,4 @@
-<?code-excerpt path-base="excerpts/packages/url_launcher_example"?>
+<?code-excerpt path-base="example"?>
 
 # url_launcher
 
@@ -8,7 +8,7 @@ A Flutter plugin for launching a URL.
 
 |             | Android | iOS   | Linux | macOS  | Web | Windows     |
 |-------------|---------|-------|-------|--------|-----|-------------|
-| **Support** | SDK 16+ | 11.0+ | Any   | 10.11+ | Any | Windows 10+ |
+| **Support** | SDK 16+ | 11.0+ | Any   | 10.14+ | Any | Windows 10+ |
 
 ## Usage
 
@@ -16,8 +16,8 @@ To use this plugin, add `url_launcher` as a [dependency in your pubspec.yaml fil
 
 ### Example
 
-<?code-excerpt "basic.dart (basic-example)"?>
-``` dart
+<?code-excerpt "lib/basic.dart (basic-example)"?>
+```dart
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -66,13 +66,15 @@ See [`-[UIApplication canOpenURL:]`](https://developer.apple.com/documentation/u
 
 Add any URL schemes passed to `canLaunchUrl` as `<queries>` entries in your
 `AndroidManifest.xml`, otherwise it will return false in most cases starting
-on Android 11 (API 30) or higher. A `<queries>`
+on Android 11 (API 30) or higher. Checking for
+`supportsLaunchMode(PreferredLaunchMode.inAppBrowserView)` also requires
+a `<queries>` entry to return anything but false. A `<queries>`
 element must be added to your manifest as a child of the root element.
 
 Example:
 
-<?code-excerpt "../../android/app/src/main/AndroidManifest.xml (android-queries)" plaster="none"?>
-``` xml
+<?code-excerpt "android/app/src/main/AndroidManifest.xml (android-queries)" plaster="none"?>
+```xml
 <!-- Provide required visibility configuration for API level 30 and above -->
 <queries>
   <!-- If your app checks for SMS support -->
@@ -84,6 +86,10 @@ Example:
   <intent>
     <action android:name="android.intent.action.VIEW" />
     <data android:scheme="tel" />
+  </intent>
+  <!-- If your application checks for inAppBrowserView launch mode support -->
+  <intent>
+    <action android:name="android.support.customtabs.action.CustomTabsService" />
   </intent>
 </queries>
 ```
@@ -141,7 +147,7 @@ due to [a bug](https://github.com/dart-lang/sdk/issues/43838) in the way `Uri`
 encodes query parameters. Using `queryParameters` will result in spaces being
 converted to `+` in many cases.
 
-<?code-excerpt "encoding.dart (encode-query-parameters)"?>
+<?code-excerpt "lib/encoding.dart (encode-query-parameters)"?>
 ```dart
 String? encodeQueryParameters(Map<String, String> params) {
   return params.entries
@@ -163,7 +169,7 @@ String? encodeQueryParameters(Map<String, String> params) {
 
 Encoding for `sms` is slightly different:
 
-<?code-excerpt "encoding.dart (sms)"?>
+<?code-excerpt "lib/encoding.dart (sms)"?>
 ```dart
 final Uri smsLaunchUri = Uri(
   scheme: 'sms',
@@ -192,7 +198,7 @@ We recommend checking first whether the directory or file exists before calling 
 
 Example:
 
-<?code-excerpt "files.dart (file)"?>
+<?code-excerpt "lib/files.dart (file)"?>
 ```dart
 final String filePath = testFile.absolute.path;
 final Uri uri = Uri.file(filePath);
@@ -210,10 +216,16 @@ if (!await launchUrl(uri)) {
 If you need to access files outside of your application's sandbox, you will need to have the necessary
 [entitlements](https://docs.flutter.dev/desktop#entitlements-and-the-app-sandbox).
 
-## Browser vs in-app Handling
+## Browser vs in-app handling
 
 On some platforms, web URLs can be launched either in an in-app web view, or
 in the default browser. The default behavior depends on the platform (see
 [`launchUrl`](https://pub.dev/documentation/url_launcher/latest/url_launcher/launchUrl.html)
 for details), but a specific mode can be used on supported platforms by
-passing a `LaunchMode`.
+passing a `PreferredLaunchMode`.
+
+Platforms that do no support a requested `PreferredLaunchMode` will
+automatically fall back to a supported mode (usually `platformDefault`). If
+your application needs to avoid that fallback behavior, however, you can check
+if the current platform supports a given mode with `supportsLaunchMode` before
+calling `launchUrl`.

@@ -1,7 +1,42 @@
-## NEXT
+## 4.4.1
 
+* Exposes `JavaScriptLogLevel` from platform interface.
+
+## 4.4.0
+
+* Adds support to register a callback to receive JavaScript console messages. See `WebViewController.setOnConsoleMessage`.
+
+## 4.3.0
+
+* Adds support to retrieve the user agent. See `WebViewController.getUserAgent`.
+
+## 4.2.4
+
+* Adds pub topics to package metadata.
+
+## 4.2.3
+
+* Fixes the code sample in the dartdocs for `WebViewController.addJavaScriptChannel`.
+* Updates minimum supported SDK version to Flutter 3.7/Dart 2.19.
+
+## 4.2.2
+
+* Fixes documentation typo.
+
+## 4.2.1
+
+* Removes obsolete null checks on non-nullable values.
+
+## 4.2.0
+
+* Adds support to receive permission requests. See `WebViewController(onPermissionRequest)`.
+
+## 4.1.0
+
+* Adds support to track URL changes. See `NavigationDelegate(onUrlChange)`.
 * Updates minimum Flutter version to 3.3.
 * Fixes common typos in tests and documentation.
+* Fixes documentation for `WebViewController` and `WebViewCookieManager`.
 
 ## 4.0.7
 

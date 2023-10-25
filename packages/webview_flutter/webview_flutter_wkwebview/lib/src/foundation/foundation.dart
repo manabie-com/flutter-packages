@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(a14n): remove this import once Flutter 3.1 or later reaches stable (including flutter/flutter#104231)
-// ignore: unnecessary_import
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -91,6 +87,12 @@ enum NSKeyValueChangeKey {
   ///
   /// See https://developer.apple.com/documentation/foundation/nskeyvaluechangeoldkey?language=objc.
   oldValue,
+
+  /// An unknown change key.
+  ///
+  /// This does not represent an actual value provided by the platform and only
+  /// indicates a value was provided that isn't currently supported.
+  unknown,
 }
 
 /// The supported keys in a cookie attributes dictionary.
@@ -199,6 +201,23 @@ class NSUrlRequest {
   final Map<String, String> allHttpHeaderFields;
 }
 
+/// Keys that may exist in the user info map of `NSError`.
+class NSErrorUserInfoKey {
+  NSErrorUserInfoKey._();
+
+  /// The corresponding value is a localized string representation of the error
+  /// that, if present, will be returned by [NSError.localizedDescription].
+  ///
+  /// See https://developer.apple.com/documentation/foundation/nslocalizeddescriptionkey.
+  static const String NSLocalizedDescription = 'NSLocalizedDescription';
+
+  /// The URL which caused a load to fail.
+  ///
+  /// See https://developer.apple.com/documentation/foundation/nsurlerrorfailingurlstringerrorkey?language=objc.
+  static const String NSURLErrorFailingURLStringError =
+      'NSErrorFailingURLStringKey';
+}
+
 /// Information about an error condition.
 ///
 /// Wraps [NSError](https://developer.apple.com/documentation/foundation/nserror?language=objc).
@@ -208,19 +227,35 @@ class NSError {
   const NSError({
     required this.code,
     required this.domain,
-    required this.localizedDescription,
+    this.userInfo = const <String, Object?>{},
   });
 
   /// The error code.
   ///
-  /// Note that errors are domain-specific.
+  /// Error codes are [domain]-specific.
   final int code;
 
   /// A string containing the error domain.
   final String domain;
 
+  /// Map of arbitrary data.
+  ///
+  /// See [NSErrorUserInfoKey] for possible keys (non-exhaustive).
+  ///
+  /// This currently only supports values that are a String.
+  final Map<String, Object?> userInfo;
+
   /// A string containing the localized description of the error.
-  final String localizedDescription;
+  String? get localizedDescription =>
+      userInfo[NSErrorUserInfoKey.NSLocalizedDescription] as String?;
+
+  @override
+  String toString() {
+    if (localizedDescription?.isEmpty ?? true) {
+      return 'Error $domain:$code:$userInfo';
+    }
+    return '$localizedDescription ($domain:$code:$userInfo)';
+  }
 }
 
 /// A representation of an HTTP cookie.
@@ -233,6 +268,42 @@ class NSHttpCookie {
 
   /// Properties of the new cookie object.
   final Map<NSHttpCookiePropertyKey, Object> properties;
+}
+
+/// An object that represents the location of a resource, such as an item on a
+/// remote server or the path to a local file.
+///
+/// See https://developer.apple.com/documentation/foundation/nsurl?language=objc.
+class NSUrl extends NSObject {
+  /// Instantiates a [NSUrl] without creating and attaching to an instance
+  /// of the associated native class.
+  ///
+  /// This should only be used outside of tests by subclasses created by this
+  /// library or to create a copy for an [InstanceManager].
+  @protected
+  NSUrl.detached({super.binaryMessenger, super.instanceManager})
+      : _nsUrlHostApi = NSUrlHostApiImpl(
+          binaryMessenger: binaryMessenger,
+          instanceManager: instanceManager,
+        ),
+        super.detached();
+
+  final NSUrlHostApiImpl _nsUrlHostApi;
+
+  /// The URL string for the receiver as an absolute URL. (read-only)
+  ///
+  /// Represents [NSURL.absoluteString](https://developer.apple.com/documentation/foundation/nsurl/1409868-absolutestring?language=objc).
+  Future<String?> getAbsoluteString() {
+    return _nsUrlHostApi.getAbsoluteStringFromInstances(this);
+  }
+
+  @override
+  NSObject copy() {
+    return NSUrl.detached(
+      binaryMessenger: _nsUrlHostApi.binaryMessenger,
+      instanceManager: _nsUrlHostApi.instanceManager,
+    );
+  }
 }
 
 /// The root class of most Objective-C class hierarchies.

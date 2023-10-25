@@ -8,11 +8,10 @@ import 'dart:io' as io;
 import 'package:file/file.dart';
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import 'common/core.dart';
+import 'common/output_utils.dart';
 import 'common/package_command.dart';
-import 'common/process_runner.dart';
 
 /// In theory this should be 8191, but in practice that was still resulting in
 /// "The input line is too long" errors. This was chosen as a value that worked
@@ -32,6 +31,7 @@ const int _exitFlutterFormatFailed = 4;
 const int _exitJavaFormatFailed = 5;
 const int _exitGitFailed = 6;
 const int _exitDependencyMissing = 7;
+const int _exitSwiftFormatFailed = 8;
 
 final Uri _googleFormatterUrl = Uri.https('github.com',
     '/google/google-java-format/releases/download/google-java-format-1.3/google-java-format-1.3-all-deps.jar');
@@ -40,23 +40,30 @@ final Uri _googleFormatterUrl = Uri.https('github.com',
 class FormatCommand extends PackageCommand {
   /// Creates an instance of the format command.
   FormatCommand(
-    Directory packagesDir, {
-    ProcessRunner processRunner = const ProcessRunner(),
-    Platform platform = const LocalPlatform(),
-  }) : super(packagesDir, processRunner: processRunner, platform: platform) {
+    super.packagesDir, {
+    super.processRunner,
+    super.platform,
+  }) {
     argParser.addFlag('fail-on-change', hide: true);
-    argParser.addOption('clang-format',
+    argParser.addOption(_clangFormatArg,
         defaultsTo: 'clang-format', help: 'Path to "clang-format" executable.');
-    argParser.addOption('java',
+    argParser.addOption(_javaArg,
         defaultsTo: 'java', help: 'Path to "java" executable.');
+    argParser.addOption(_swiftFormatArg,
+        help: 'Path to "swift-format" executable.');
   }
+
+  static const String _clangFormatArg = 'clang-format';
+  static const String _javaArg = 'java';
+  static const String _swiftFormatArg = 'swift-format';
 
   @override
   final String name = 'format';
 
   @override
   final String description =
-      'Formats the code of all packages (Java, Objective-C, C++, and Dart).\n\n'
+      'Formats the code of all packages (Java, Objective-C, C++, Dart, and '
+      'optionally Swift).\n\n'
       'This command requires "git", "flutter" and "clang-format" v5 to be in '
       'your path.';
 
@@ -72,6 +79,10 @@ class FormatCommand extends PackageCommand {
     await _formatDart(files);
     await _formatJava(files, googleFormatterPath);
     await _formatCppAndObjectiveC(files);
+    final String? swiftFormat = getNullableStringArg(_swiftFormatArg);
+    if (swiftFormat != null) {
+      await _formatSwift(swiftFormat, files);
+    }
 
     if (getBoolArg('fail-on-change')) {
       final bool modified = await _didModifyAnything();
@@ -104,9 +115,9 @@ class FormatCommand extends PackageCommand {
     print('These files are not formatted correctly (see diff below):');
     LineSplitter.split(stdout).map((String line) => '  $line').forEach(print);
 
-    print('\nTo fix run "dart pub global activate flutter_plugin_tools && '
-        'dart pub global run flutter_plugin_tools format" or copy-paste '
-        'this command into your terminal:');
+    print('\nTo fix run the repository tooling `format` command: '
+        'https://github.com/flutter/packages/blob/main/script/tool/README.md#format-code\n'
+        'or copy-paste this command into your terminal:');
 
     final io.ProcessResult diff = await processRunner.run(
       'git',
@@ -142,10 +153,24 @@ class FormatCommand extends PackageCommand {
     }
   }
 
+  Future<void> _formatSwift(String swiftFormat, Iterable<String> files) async {
+    final Iterable<String> swiftFiles =
+        _getPathsWithExtensions(files, <String>{'.swift'});
+    if (swiftFiles.isNotEmpty) {
+      print('Formatting .swift files...');
+      final int exitCode =
+          await _runBatched(swiftFormat, <String>['-i'], files: swiftFiles);
+      if (exitCode != 0) {
+        printError('Failed to format Swift files: exit code $exitCode.');
+        throw ToolExit(_exitSwiftFormatFailed);
+      }
+    }
+  }
+
   Future<String> _findValidClangFormat() async {
-    final String clangFormatArg = getStringArg('clang-format');
-    if (await _hasDependency(clangFormatArg)) {
-      return clangFormatArg;
+    final String clangFormat = getStringArg(_clangFormatArg);
+    if (await _hasDependency(clangFormat)) {
+      return clangFormat;
     }
 
     // There is a known issue where "chromium/depot_tools/clang-format"

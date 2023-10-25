@@ -253,9 +253,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                         child: Center(
                           child: AspectRatio(
                               aspectRatio:
-                                  localVideoController.value.size != null
-                                      ? localVideoController.value.aspectRatio
-                                      : 1.0,
+                                  localVideoController.value.aspectRatio,
                               child: VideoPlayer(localVideoController)),
                         ),
                       ),
@@ -276,7 +274,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
             IconButton(
               icon: const Icon(Icons.flash_on),
               color: Colors.blue,
-              onPressed: () {}, // TODO(camsim99): Add functionality back here.
+              onPressed: controller != null ? onFlashModeButtonPressed : null,
             ),
             // The exposure and focus mode are currently not supported on the web.
             ...!kIsWeb
@@ -328,28 +326,36 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
               color: controller?.value.flashMode == FlashMode.off
                   ? Colors.orange
                   : Colors.blue,
-              onPressed: () {}, // TODO(camsim99): Add functionality back here.
+              onPressed: controller != null
+                  ? () => onSetFlashModeButtonPressed(FlashMode.off)
+                  : null,
             ),
             IconButton(
               icon: const Icon(Icons.flash_auto),
               color: controller?.value.flashMode == FlashMode.auto
                   ? Colors.orange
                   : Colors.blue,
-              onPressed: () {}, // TODO(camsim99): Add functionality back here.
+              onPressed: controller != null
+                  ? () => onSetFlashModeButtonPressed(FlashMode.auto)
+                  : null,
             ),
             IconButton(
               icon: const Icon(Icons.flash_on),
               color: controller?.value.flashMode == FlashMode.always
                   ? Colors.orange
                   : Colors.blue,
-              onPressed: () {}, // TODO(camsim99): Add functionality back here.
+              onPressed: controller != null
+                  ? () => onSetFlashModeButtonPressed(FlashMode.always)
+                  : null,
             ),
             IconButton(
               icon: const Icon(Icons.highlight),
               color: controller?.value.flashMode == FlashMode.torch
                   ? Colors.orange
                   : Colors.blue,
-              onPressed: () {}, // TODO(camsim99): Add functionality back here.
+              onPressed: controller != null
+                  ? () => onSetFlashModeButtonPressed(FlashMode.torch)
+                  : null,
             ),
           ],
         ),
@@ -359,16 +365,12 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
   Widget _exposureModeControlRowWidget() {
     final ButtonStyle styleAuto = TextButton.styleFrom(
-      // TODO(darrenaustin): Migrate to new API once it lands in stable: https://github.com/flutter/flutter/issues/105724
-      // ignore: deprecated_member_use
-      primary: controller?.value.exposureMode == ExposureMode.auto
+      foregroundColor: controller?.value.exposureMode == ExposureMode.auto
           ? Colors.orange
           : Colors.blue,
     );
     final ButtonStyle styleLocked = TextButton.styleFrom(
-      // TODO(darrenaustin): Migrate to new API once it lands in stable: https://github.com/flutter/flutter/issues/105724
-      // ignore: deprecated_member_use
-      primary: controller?.value.exposureMode == ExposureMode.locked
+      foregroundColor: controller?.value.exposureMode == ExposureMode.locked
           ? Colors.orange
           : Colors.blue,
     );
@@ -441,16 +443,12 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
   Widget _focusModeControlRowWidget() {
     final ButtonStyle styleAuto = TextButton.styleFrom(
-      // TODO(darrenaustin): Migrate to new API once it lands in stable: https://github.com/flutter/flutter/issues/105724
-      // ignore: deprecated_member_use
-      primary: controller?.value.focusMode == FocusMode.auto
+      foregroundColor: controller?.value.focusMode == FocusMode.auto
           ? Colors.orange
           : Colors.blue,
     );
     final ButtonStyle styleLocked = TextButton.styleFrom(
-      // TODO(darrenaustin): Migrate to new API once it lands in stable: https://github.com/flutter/flutter/issues/105724
-      // ignore: deprecated_member_use
-      primary: controller?.value.focusMode == FocusMode.locked
+      foregroundColor: controller?.value.focusMode == FocusMode.locked
           ? Colors.orange
           : Colors.blue,
     );
@@ -514,7 +512,8 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
         IconButton(
           icon: const Icon(Icons.videocam),
           color: Colors.blue,
-          onPressed: () {}, // TODO(camsim99): Add functionality back here.
+          onPressed:
+              cameraController == null ? null : onVideoRecordButtonPressed,
         ),
         IconButton(
           icon: cameraController != null &&
@@ -522,12 +521,20 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
               ? const Icon(Icons.play_arrow)
               : const Icon(Icons.pause),
           color: Colors.blue,
-          onPressed: () {}, // TODO(camsim99): Add functionality back here.
+          onPressed: () {
+            if (cameraController == null) {
+              return;
+            } else if (cameraController.value.isRecordingPaused) {
+              return onResumeButtonPressed();
+            } else {
+              return onPauseButtonPressed();
+            }
+          },
         ),
         IconButton(
           icon: const Icon(Icons.stop),
           color: Colors.red,
-          onPressed: () {}, // TODO(camsim99): Add functionality back here.
+          onPressed: cameraController == null ? null : onStopButtonPressed,
         ),
         IconButton(
           icon: const Icon(Icons.pause_presentation),
@@ -972,11 +979,15 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     }
 
     final VideoPlayerController vController = kIsWeb
+        // TODO(gabrielokura): remove the ignore once the following line can migrate to
+        // use VideoPlayerController.networkUrl after the issue is resolved.
+        // https://github.com/flutter/flutter/issues/121927
+        // ignore: deprecated_member_use
         ? VideoPlayerController.network(videoFile!.path)
         : VideoPlayerController.file(File(videoFile!.path));
 
     videoPlayerListener = () {
-      if (videoController != null && videoController!.value.size != null) {
+      if (videoController != null) {
         // Refreshing the state to update video player with the correct ratio.
         if (mounted) {
           setState(() {});

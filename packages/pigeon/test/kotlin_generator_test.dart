@@ -6,6 +6,8 @@ import 'package:pigeon/ast.dart';
 import 'package:pigeon/kotlin_generator.dart';
 import 'package:test/test.dart';
 
+const String DEFAULT_PACKAGE_NAME = 'test_package';
+
 void main() {
   test('gen one class', () {
     final Class klass = Class(
@@ -28,7 +30,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('data class Foobar ('));
     expect(code, contains('val field1: Long? = null'));
@@ -52,7 +59,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('enum class Foobar(val raw: Int) {'));
     expect(code, contains('ONE(0)'));
@@ -96,7 +108,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('enum class Foo(val raw: Int) {'));
     expect(code, contains('data class Bar ('));
@@ -130,7 +147,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('enum class Foo(val raw: Int) {'));
     expect(code, contains('val fooArg = Foo.ofRaw(args[0] as Int)'));
@@ -177,7 +199,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('interface Api'));
     expect(code, contains('fun doSomething(input: Input): Output'));
@@ -323,7 +350,12 @@ void main() {
 
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('val aBool: Boolean'));
     expect(code, contains('val aInt: Long'));
@@ -392,7 +424,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code,
         contains('class Api(private val binaryMessenger: BinaryMessenger)'));
@@ -430,7 +467,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, isNot(matches('.*doSomething(.*) ->')));
     expect(code, matches('doSomething(.*)'));
@@ -467,10 +509,15 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
-    expect(code, contains('callback: () -> Unit'));
-    expect(code, contains('callback()'));
+    expect(code, contains('callback: (Result<Unit>) -> Unit'));
+    expect(code, contains('callback(Result.success(Unit))'));
   });
 
   test('gen host void argument api', () {
@@ -497,7 +544,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('fun doSomething(): Output'));
     expect(code, contains('wrapped = listOf<Any?>(api.doSomething())'));
@@ -529,9 +581,15 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
-    expect(code, contains('fun doSomething(callback: (Output) -> Unit)'));
+    expect(
+        code, contains('fun doSomething(callback: (Result<Output>) -> Unit)'));
     expect(code, contains('channel.send(null)'));
   });
 
@@ -550,7 +608,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('data class Foobar'));
     expect(code, contains('val field1: List<Any?>? = null'));
@@ -571,7 +634,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('data class Foobar'));
     expect(code, contains('val field1: Map<Any, Any?>? = null'));
@@ -610,7 +678,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('data class Outer'));
     expect(code, contains('data class Nested'));
@@ -664,7 +737,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('interface Api'));
     expect(code, contains('api.doSomething(argArg) {'));
@@ -713,7 +791,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('class Api'));
     expect(code, matches('fun doSomething.*Input.*callback.*Output.*Unit'));
@@ -747,7 +830,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('enum class Enum1(val raw: Int)'));
     expect(code, contains('ONE(0)'));
@@ -765,7 +853,12 @@ void main() {
       copyrightHeader: makeIterable('hello world'),
     );
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, startsWith('// hello world'));
   });
@@ -793,7 +886,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('data class Foobar'));
     expect(code, contains('val field1: List<Long?>'));
@@ -823,7 +921,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('data class Foobar'));
     expect(code, contains('val field1: Map<String?, String?>'));
@@ -855,7 +958,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('fun doit(arg: List<Long?>'));
   });
@@ -886,7 +994,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('fun doit(argArg: List<Long?>'));
   });
@@ -912,7 +1025,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('fun doit(): List<Long?>'));
     expect(code, contains('wrapped = listOf<Any?>(api.doit())'));
@@ -940,11 +1058,16 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
-    expect(code, contains('fun doit(callback: (List<Long?>) -> Unit'));
-    expect(code, contains('val result = it as List<Long?>'));
-    expect(code, contains('callback(result)'));
+    expect(code, contains('fun doit(callback: (Result<List<Long?>>) -> Unit)'));
+    expect(code, contains('val output = it[0] as List<Long?>'));
+    expect(code, contains('callback(Result.success(output))'));
   });
 
   test('host multiple args', () {
@@ -969,7 +1092,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('fun add(x: Long, y: Long): Long'));
     expect(code, contains('val args = message as List<Any?>'));
@@ -1007,14 +1135,24 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('val channel = BasicMessageChannel'));
-    expect(code,
-        contains('val result = if (it is Int) it.toLong() else it as Long'));
-    expect(code, contains('callback(result)'));
-    expect(code,
-        contains('fun add(xArg: Long, yArg: Long, callback: (Long) -> Unit)'));
+    expect(
+      code,
+      contains(
+          'val output = it[0].let { if (it is Int) it.toLong() else it as Long }'),
+    );
+    expect(code, contains('callback(Result.success(output))'));
+    expect(
+        code,
+        contains(
+            'fun add(xArg: Long, yArg: Long, callback: (Result<Long>) -> Unit)'));
     expect(code, contains('channel.send(listOf(xArg, yArg)) {'));
   });
 
@@ -1037,7 +1175,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('fun doit(): Long?'));
   });
@@ -1062,7 +1205,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('fun doit(callback: (Result<Long?>) -> Unit'));
   });
@@ -1090,7 +1238,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(
         code,
@@ -1121,9 +1274,17 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
-    expect(code, contains('fun doit(fooArg: Long?, callback: () -> Unit'));
+    expect(
+      code,
+      contains('fun doit(fooArg: Long?, callback: (Result<Unit>) -> Unit)'),
+    );
   });
 
   test('nonnull fields', () {
@@ -1157,7 +1318,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('val input: String\n'));
   });
@@ -1239,7 +1405,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     for (final String comment in comments) {
       // This regex finds the comment only between the open and close comment block
@@ -1251,7 +1422,7 @@ void main() {
     expect(code, isNot(contains('*//')));
   });
 
-  test('doesnt create codecs if no custom datatypes', () {
+  test("doesn't create codecs if no custom datatypes", () {
     final Root root = Root(
       apis: <Api>[
         Api(
@@ -1280,7 +1451,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, isNot(contains(' : StandardMessageCodec() ')));
     expect(code, contains('StandardMessageCodec'));
@@ -1325,7 +1501,12 @@ void main() {
     final StringBuffer sink = StringBuffer();
     const KotlinOptions kotlinOptions = KotlinOptions();
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains(' : StandardMessageCodec() '));
   });
@@ -1346,7 +1527,12 @@ void main() {
     const KotlinOptions kotlinOptions =
         KotlinOptions(errorClassName: 'SomeError');
     const KotlinGenerator generator = KotlinGenerator();
-    generator.generate(kotlinOptions, root, sink);
+    generator.generate(
+      kotlinOptions,
+      root,
+      sink,
+      dartPackageName: DEFAULT_PACKAGE_NAME,
+    );
     final String code = sink.toString();
     expect(code, contains('class SomeError'));
     expect(code, contains('if (exception is SomeError)'));

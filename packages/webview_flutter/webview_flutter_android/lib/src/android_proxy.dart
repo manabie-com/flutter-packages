@@ -35,6 +35,24 @@ class AndroidWebViewProxy {
       android_webview.WebView webView,
       android_webview.FileChooserParams params,
     )? onShowFileChooser,
+    void Function(
+      android_webview.WebChromeClient instance,
+      android_webview.PermissionRequest request,
+    )? onPermissionRequest,
+    Future<void> Function(String origin,
+            android_webview.GeolocationPermissionsCallback callback)?
+        onGeolocationPermissionsShowPrompt,
+    void Function(android_webview.WebChromeClient instance)?
+        onGeolocationPermissionsHidePrompt,
+    void Function(android_webview.WebChromeClient instance,
+            android_webview.ConsoleMessage message)?
+        onConsoleMessage,
+    void Function(
+            android_webview.WebChromeClient instance,
+            android_webview.View view,
+            android_webview.CustomViewCallback callback)?
+        onShowCustomView,
+    void Function(android_webview.WebChromeClient instance)? onHideCustomView,
   }) createAndroidWebChromeClient;
 
   /// Constructs a [android_webview.WebViewClient].
@@ -47,7 +65,7 @@ class AndroidWebViewProxy {
       android_webview.WebResourceError error,
     )? onReceivedRequestError,
     @Deprecated('Only called on Android version < 23.')
-        void Function(
+    void Function(
       android_webview.WebView webView,
       int errorCode,
       String description,
@@ -58,6 +76,8 @@ class AndroidWebViewProxy {
       android_webview.WebResourceRequest request,
     )? requestLoading,
     void Function(android_webview.WebView webView, String url)? urlLoading,
+    void Function(android_webview.WebView webView, String url, bool isReload)?
+        doUpdateVisitedHistory,
   }) createAndroidWebViewClient;
 
   /// Constructs a [android_webview.FlutterAssetManager].

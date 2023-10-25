@@ -27,7 +27,7 @@ internal class AsyncHandlersTest: TestCase() {
             val message = arg<ByteBuffer>(1)
             val reply = arg<BinaryMessenger.BinaryReply>(2)
             message.position(0)
-            val replyData = codec.encodeMessage(value)
+            val replyData = codec.encodeMessage(listOf(value))
             replyData?.position(0)
             reply.reply(replyData)
         }
@@ -35,14 +35,14 @@ internal class AsyncHandlersTest: TestCase() {
         var didCall = false
         api.echoAsyncString(value) {
             didCall = true
-            assertEquals(it, value)
+            assertEquals(it.getOrNull(), value)
         }
 
         assertTrue(didCall)
 
         verify {
             binaryMessenger.send(
-                "dev.flutter.pigeon.FlutterIntegrationCoreApi.echoAsyncString",
+                "dev.flutter.pigeon.pigeon_integration_tests.FlutterIntegrationCoreApi.echoAsyncString",
                 any(),
                 any()
             )
@@ -58,10 +58,10 @@ internal class AsyncHandlersTest: TestCase() {
 
         val input = "Test"
         val output = input
-        val channelName = "dev.flutter.pigeon.HostSmallApi.echo"
+        val channelName = "dev.flutter.pigeon.pigeon_integration_tests.HostSmallApi.echo"
 
         every {
-            binaryMessenger.setMessageHandler("dev.flutter.pigeon.HostSmallApi.voidVoid", any())
+            binaryMessenger.setMessageHandler("dev.flutter.pigeon.pigeon_integration_tests.HostSmallApi.voidVoid", any())
         } returns Unit
         every { binaryMessenger.setMessageHandler(channelName, capture(handlerSlot)) } returns Unit
         every { api.echo(any(), any()) } answers {
@@ -96,11 +96,11 @@ internal class AsyncHandlersTest: TestCase() {
 
         val handlerSlot = slot<BinaryMessenger.BinaryMessageHandler>()
 
-        val channelName = "dev.flutter.pigeon.HostSmallApi.voidVoid"
+        val channelName = "dev.flutter.pigeon.pigeon_integration_tests.HostSmallApi.voidVoid"
 
         every { binaryMessenger.setMessageHandler(channelName, capture(handlerSlot)) } returns Unit
         every {
-            binaryMessenger.setMessageHandler("dev.flutter.pigeon.HostSmallApi.echo", any())
+            binaryMessenger.setMessageHandler("dev.flutter.pigeon.pigeon_integration_tests.HostSmallApi.echo", any())
         } returns Unit
         every { api.voidVoid(any()) } answers {
             val callback = arg<() -> Unit>(0)

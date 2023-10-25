@@ -1,3 +1,90 @@
+## 3.9.2
+
+* Fixes error caused by calling `WKWebViewConfiguration.limitsNavigationsToAppBoundDomains` on
+  versions below 14.
+
+## 3.9.1
+
+* Fixes bug where `WebkitWebViewController.getUserAgent` was incorrectly returning an empty String.
+
+## 3.9.0
+
+* Adds support for `PlatformWebViewController.getUserAgent`.
+
+## 3.8.0
+
+* Adds support to register a callback to receive JavaScript console messages. See `WebKitWebViewController.setOnConsoleMessage`.
+
+## 3.7.4
+
+* Adds pub topics to package metadata.
+* Updates minimum supported SDK version to Flutter 3.7/Dart 2.19.
+
+## 3.7.3
+
+* Fixes bug where the `PlatformWebViewWidget` was rebuilt unnecessarily.
+
+## 3.7.2
+
+* Fixes bug where `PlatformWebViewWidget` doesn't rebuild when the controller changes.
+
+## 3.7.1
+
+* Updates pigeon version to `10.1.4`.
+
+## 3.7.0
+
+* Adds support for `WebResouceError.url`.
+
+## 3.6.3
+
+* Introduces `NSError.toString` for better diagnostics.
+
+## 3.6.2 
+
+* Fixes unawaited_futures violations.
+
+## 3.6.1
+
+* Fixes bug where a native `NSURL` could be removed from an `InstanceManager` if it is equal to an
+  already present `NSURL`.
+* Fixes compile-time error from using `WKWebView.inspectable` on unsupported Xcode versions.
+
+## 3.6.0
+
+* Adds support to enable debugging of web contents on the latest versions of WebKit. See
+  `WebKitWebViewController.setInspectable`.
+
+## 3.5.0
+
+* Adds support to limit navigation to pages within the app’s domain. See
+  `WebKitWebViewControllerCreationParams.limitsNavigationsToAppBoundDomains`.
+
+## 3.4.4
+
+* Removes obsolete null checks on non-nullable values.
+
+## 3.4.3
+
+* Replace `describeEnum` with the `name` getter.
+
+## 3.4.2
+
+* Fixes an exception caused by the `onUrlChange` callback passing a null `NSUrl`.
+
+## 3.4.1
+
+* Fixes internal type conversion error.
+* Adds internal unknown enum values to handle api updates.
+
+## 3.4.0
+
+* Adds support for `PlatformWebViewController.setOnPlatformPermissionRequest`.
+
+## 3.3.0
+
+* Adds support for `PlatformNavigationDelegate.onUrlChange`.
+
 ## 3.2.4
 
 * Updates pigeon to fix warnings with clang 15.

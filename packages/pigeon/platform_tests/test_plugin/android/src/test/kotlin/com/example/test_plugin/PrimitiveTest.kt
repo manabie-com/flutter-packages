@@ -22,7 +22,7 @@ class PrimitiveTest: TestCase() {
 
         val input = 1
 
-        val channelName = "dev.flutter.pigeon.PrimitiveHostApi.anInt"
+        val channelName = "dev.flutter.pigeon.pigeon_integration_tests.PrimitiveHostApi.anInt"
         val handlerSlot = slot<BinaryMessenger.BinaryMessageHandler>()
 
         every { binaryMessenger.setMessageHandler(channelName, capture(handlerSlot)) } returns Unit
@@ -57,7 +57,7 @@ class PrimitiveTest: TestCase() {
         var didCall = false
         api.anInt(input) {
             didCall = true
-            assertEquals(input, it)
+            assertEquals(input, it.getOrNull())
         }
 
         assertTrue(didCall)
@@ -70,7 +70,7 @@ class PrimitiveTest: TestCase() {
 
         val input = true
 
-        val channelName = "dev.flutter.pigeon.PrimitiveHostApi.aBool"
+        val channelName = "dev.flutter.pigeon.pigeon_integration_tests.PrimitiveHostApi.aBool"
         val handlerSlot = slot<BinaryMessenger.BinaryMessageHandler>()
 
         every { binaryMessenger.setMessageHandler(channelName, capture(handlerSlot)) } returns Unit
@@ -105,7 +105,7 @@ class PrimitiveTest: TestCase() {
         var didCall = false
         api.aBool(input) {
             didCall = true
-            assertEquals(input, it)
+            assertEquals(input, it.getOrNull())
         }
 
         assertTrue(didCall)
@@ -118,7 +118,7 @@ class PrimitiveTest: TestCase() {
 
         val input = "Hello"
 
-        val channelName = "dev.flutter.pigeon.PrimitiveHostApi.aString"
+        val channelName = "dev.flutter.pigeon.pigeon_integration_tests.PrimitiveHostApi.aString"
         val handlerSlot = slot<BinaryMessenger.BinaryMessageHandler>()
 
         every { binaryMessenger.setMessageHandler(channelName, capture(handlerSlot)) } returns Unit
@@ -150,7 +150,7 @@ class PrimitiveTest: TestCase() {
 
         val input = 1.0
 
-        val channelName = "dev.flutter.pigeon.PrimitiveHostApi.aDouble"
+        val channelName = "dev.flutter.pigeon.pigeon_integration_tests.PrimitiveHostApi.aDouble"
         val handlerSlot = slot<BinaryMessenger.BinaryMessageHandler>()
 
         every { binaryMessenger.setMessageHandler(channelName, capture(handlerSlot)) } returns Unit
@@ -185,7 +185,7 @@ class PrimitiveTest: TestCase() {
         var didCall = false
         api.aDouble(input) {
             didCall = true
-            assertEquals(input, it)
+            assertEquals(input, it.getOrNull())
         }
 
         assertTrue(didCall)
@@ -198,7 +198,7 @@ class PrimitiveTest: TestCase() {
 
         val input = mapOf<Any, Any?>("a" to 1, "b" to 2)
 
-        val channelName = "dev.flutter.pigeon.PrimitiveHostApi.aMap"
+        val channelName = "dev.flutter.pigeon.pigeon_integration_tests.PrimitiveHostApi.aMap"
         val handlerSlot = slot<BinaryMessenger.BinaryMessageHandler>()
 
         every { binaryMessenger.setMessageHandler(channelName, capture(handlerSlot)) } returns Unit
@@ -233,7 +233,7 @@ class PrimitiveTest: TestCase() {
         var didCall = false
         api.aMap(input) {
             didCall = true
-            assertEquals(input, it)
+            assertEquals(input, it.getOrNull())
         }
 
         assertTrue(didCall)
@@ -246,7 +246,7 @@ class PrimitiveTest: TestCase() {
 
         val input = listOf(1, 2, 3)
 
-        val channelName = "dev.flutter.pigeon.PrimitiveHostApi.aList"
+        val channelName = "dev.flutter.pigeon.pigeon_integration_tests.PrimitiveHostApi.aList"
         val handlerSlot = slot<BinaryMessenger.BinaryMessageHandler>()
 
         every { binaryMessenger.setMessageHandler(channelName, capture(handlerSlot)) } returns Unit
@@ -281,7 +281,7 @@ class PrimitiveTest: TestCase() {
         var didCall = false
         api.aList(input) {
             didCall = true
-            assertEquals(input, it)
+            assertEquals(input, it.getOrNull())
         }
 
         assertTrue(didCall)
@@ -294,7 +294,7 @@ class PrimitiveTest: TestCase() {
 
         val input = intArrayOf(1, 2, 3)
 
-        val channelName = "dev.flutter.pigeon.PrimitiveHostApi.anInt32List"
+        val channelName = "dev.flutter.pigeon.pigeon_integration_tests.PrimitiveHostApi.anInt32List"
         val handlerSlot = slot<BinaryMessenger.BinaryMessageHandler>()
 
         every { binaryMessenger.setMessageHandler(channelName, capture(handlerSlot)) } returns Unit
@@ -329,7 +329,7 @@ class PrimitiveTest: TestCase() {
         var didCall = false
         api.anInt32List(input) {
             didCall = true
-            assertTrue(input.contentEquals(it))
+            assertTrue(input.contentEquals(it.getOrNull()))
         }
 
         assertTrue(didCall)
@@ -342,7 +342,7 @@ class PrimitiveTest: TestCase() {
 
         val input = listOf(true, false, true)
 
-        val channelName = "dev.flutter.pigeon.PrimitiveHostApi.aBoolList"
+        val channelName = "dev.flutter.pigeon.pigeon_integration_tests.PrimitiveHostApi.aBoolList"
         val handlerSlot = slot<BinaryMessenger.BinaryMessageHandler>()
 
         every { binaryMessenger.setMessageHandler(channelName, capture(handlerSlot)) } returns Unit
@@ -377,7 +377,7 @@ class PrimitiveTest: TestCase() {
         var didCall = false
         api.aBoolList(input) {
             didCall = true
-            assertEquals(input, it)
+            assertEquals(input, it.getOrNull())
         }
 
         assertTrue(didCall)
@@ -390,7 +390,7 @@ class PrimitiveTest: TestCase() {
 
         val input = mapOf<String?, Long?>("a" to 1, "b" to 2)
 
-        val channelName = "dev.flutter.pigeon.PrimitiveHostApi.aStringIntMap"
+        val channelName = "dev.flutter.pigeon.pigeon_integration_tests.PrimitiveHostApi.aStringIntMap"
         val handlerSlot = slot<BinaryMessenger.BinaryMessageHandler>()
 
         every { binaryMessenger.setMessageHandler(channelName, capture(handlerSlot)) } returns Unit
@@ -425,7 +425,7 @@ class PrimitiveTest: TestCase() {
         var didCall = false
         api.aStringIntMap(input) {
             didCall = true
-            assertEquals(input, it)
+            assertEquals(input, it.getOrNull())
         }
 
         assertTrue(didCall)

@@ -20,7 +20,7 @@ class NullableReturnsTest: TestCase() {
 
         val output = 1L
 
-        val channelName = "dev.flutter.pigeon.NullableReturnHostApi.doit"
+        val channelName = "dev.flutter.pigeon.pigeon_integration_tests.NullableReturnHostApi.doit"
         val handlerSlot = slot<BinaryMessenger.BinaryMessageHandler>()
 
         every { binaryMessenger.setMessageHandler(channelName, capture(handlerSlot)) } returns Unit
@@ -55,7 +55,7 @@ class NullableReturnsTest: TestCase() {
         every { binaryMessenger.send(any(), any(), any()) } answers {
             val codec = NullableReturnFlutterApi.codec
             val reply = arg<BinaryMessenger.BinaryReply>(2)
-            val replyData = codec.encodeMessage(output)
+            val replyData = codec.encodeMessage(listOf(output))
             replyData?.position(0)
             reply.reply(replyData)
         }
@@ -63,7 +63,7 @@ class NullableReturnsTest: TestCase() {
         var didCall = false
         api.doit {
             didCall = true
-            assertEquals(output, it)
+            assertEquals(output, it.getOrNull())
         }
 
         assertTrue(didCall)

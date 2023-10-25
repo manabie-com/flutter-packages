@@ -159,20 +159,17 @@ final class GoogleMapController
     }
     loadedCallbackPending = true;
     googleMap.setOnMapLoadedCallback(
-        new GoogleMap.OnMapLoadedCallback() {
-          @Override
-          public void onMapLoaded() {
-            loadedCallbackPending = false;
-            postFrameCallback(
-                () -> {
-                  postFrameCallback(
-                      () -> {
-                        if (mapView != null) {
-                          mapView.invalidate();
-                        }
-                      });
-                });
-          }
+        () -> {
+          loadedCallbackPending = false;
+          postFrameCallback(
+              () -> {
+                postFrameCallback(
+                    () -> {
+                      if (mapView != null) {
+                        mapView.invalidate();
+                      }
+                    });
+              });
         });
   }
 
@@ -605,20 +602,6 @@ final class GoogleMapController
     googleMap.setOnCircleClickListener(listener);
     googleMap.setOnMapClickListener(listener);
     googleMap.setOnMapLongClickListener(listener);
-  }
-
-  // @Override
-  // The minimum supported version of Flutter doesn't have this method on the PlatformView interface, but the maximum
-  // does. This will override it when available even with the annotation commented out.
-  public void onInputConnectionLocked() {
-    // TODO(mklim): Remove this empty override once https://github.com/flutter/flutter/issues/40126 is fixed in stable.
-  }
-
-  // @Override
-  // The minimum supported version of Flutter doesn't have this method on the PlatformView interface, but the maximum
-  // does. This will override it when available even with the annotation commented out.
-  public void onInputConnectionUnlocked() {
-    // TODO(mklim): Remove this empty override once https://github.com/flutter/flutter/issues/40126 is fixed in stable.
   }
 
   // DefaultLifecycleObserver

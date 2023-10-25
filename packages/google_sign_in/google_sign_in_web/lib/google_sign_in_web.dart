@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:html' as html;
-import 'dart:ui' as ui;
+import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/foundation.dart' show visibleForTesting, kDebugMode;
 import 'package:flutter/material.dart';
@@ -47,13 +47,10 @@ class GoogleSignInPlugin extends GoogleSignInPlatform {
   /// For tests, the plugin can skip its loading process with [debugOverrideLoader],
   /// and the implementation of the underlying GIS SDK client through [debugOverrideGisSdkClient].
   GoogleSignInPlugin({
+    @visibleForTesting bool debugOverrideLoader = false,
+    @visibleForTesting GisSdkClient? debugOverrideGisSdkClient,
     @visibleForTesting
-        bool debugOverrideLoader = false,
-    @visibleForTesting
-        GisSdkClient? debugOverrideGisSdkClient,
-    @visibleForTesting
-        StreamController<GoogleSignInUserData?>?
-            debugOverrideUserDataController,
+    StreamController<GoogleSignInUserData?>? debugOverrideUserDataController,
   })  : _gisSdkClient = debugOverrideGisSdkClient,
         _userDataController = debugOverrideUserDataController ??
             StreamController<GoogleSignInUserData?>.broadcast() {
@@ -175,8 +172,7 @@ class GoogleSignInPlugin extends GoogleSignInPlatform {
 
   // Register a factory for the Button HtmlElementView.
   void _registerButtonFactory() {
-    // ignore: avoid_dynamic_calls, undefined_prefixed_name
-    ui.platformViewRegistry.registerViewFactory(
+    ui_web.platformViewRegistry.registerViewFactory(
       'gsi_login_button',
       (int viewId) {
         final DomElement element = createDomElement('div');
@@ -262,14 +258,14 @@ class GoogleSignInPlugin extends GoogleSignInPlatform {
   Future<void> signOut() async {
     await initialized;
 
-    _gisClient.signOut();
+    await _gisClient.signOut();
   }
 
   @override
   Future<void> disconnect() async {
     await initialized;
 
-    _gisClient.disconnect();
+    await _gisClient.disconnect();
   }
 
   @override
@@ -283,7 +279,7 @@ class GoogleSignInPlugin extends GoogleSignInPlatform {
   Future<void> clearAuthCache({required String token}) async {
     await initialized;
 
-    _gisClient.clearAuthCache();
+    await _gisClient.clearAuthCache();
   }
 
   @override

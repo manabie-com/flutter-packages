@@ -6,17 +6,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
 import 'package:webview_flutter_platform_interface/webview_flutter_platform_interface.dart';
 import 'package:webview_flutter_wkwebview/src/foundation/foundation.dart';
 import 'package:webview_flutter_wkwebview/src/web_kit/web_kit.dart';
 import 'package:webview_flutter_wkwebview/src/webkit_proxy.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
-import 'webkit_navigation_delegate_test.mocks.dart';
-
-@GenerateMocks(<Type>[WKWebView])
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -97,12 +92,17 @@ void main() {
         const NSError(
           code: WKErrorCode.webViewInvalidated,
           domain: 'domain',
-          localizedDescription: 'my desc',
+          userInfo: <String, Object?>{
+            NSErrorUserInfoKey.NSURLErrorFailingURLStringError:
+                'www.flutter.dev',
+            NSErrorUserInfoKey.NSLocalizedDescription: 'my desc',
+          },
         ),
       );
 
       expect(callbackError.description, 'my desc');
       expect(callbackError.errorCode, WKErrorCode.webViewInvalidated);
+      expect(callbackError.url, 'www.flutter.dev');
       expect(callbackError.domain, 'domain');
       expect(callbackError.errorType, WebResourceErrorType.webViewInvalidated);
       expect(callbackError.isForMainFrame, true);
@@ -131,11 +131,16 @@ void main() {
         const NSError(
           code: WKErrorCode.webViewInvalidated,
           domain: 'domain',
-          localizedDescription: 'my desc',
+          userInfo: <String, Object?>{
+            NSErrorUserInfoKey.NSURLErrorFailingURLStringError:
+                'www.flutter.dev',
+            NSErrorUserInfoKey.NSLocalizedDescription: 'my desc',
+          },
         ),
       );
 
       expect(callbackError.description, 'my desc');
+      expect(callbackError.url, 'www.flutter.dev');
       expect(callbackError.errorCode, WKErrorCode.webViewInvalidated);
       expect(callbackError.domain, 'domain');
       expect(callbackError.errorType, WebResourceErrorType.webViewInvalidated);
@@ -209,33 +214,6 @@ void main() {
       expect(callbackRequest.url, 'https://www.google.com');
       expect(callbackRequest.isMainFrame, isFalse);
     });
-
-    test('Requests to open a new window loads request in same window', () {
-      WebKitNavigationDelegate(
-        const WebKitNavigationDelegateCreationParams(
-          webKitProxy: WebKitProxy(
-            createNavigationDelegate: CapturingNavigationDelegate.new,
-            createUIDelegate: CapturingUIDelegate.new,
-          ),
-        ),
-      );
-
-      final MockWKWebView mockWebView = MockWKWebView();
-
-      const NSUrlRequest request = NSUrlRequest(url: 'https://www.google.com');
-
-      CapturingUIDelegate.lastCreatedDelegate.onCreateWebView!(
-        mockWebView,
-        WKWebViewConfiguration.detached(),
-        const WKNavigationAction(
-          request: request,
-          targetFrame: WKFrameInfo(isMainFrame: false),
-          navigationType: WKNavigationType.linkActivated,
-        ),
-      );
-
-      verify(mockWebView.loadRequest(request));
-    });
   });
 }
 
@@ -257,7 +235,11 @@ class CapturingNavigationDelegate extends WKNavigationDelegate {
 
 // Records the last created instance of itself.
 class CapturingUIDelegate extends WKUIDelegate {
-  CapturingUIDelegate({super.onCreateWebView}) : super.detached() {
+  CapturingUIDelegate({
+    super.onCreateWebView,
+    super.requestMediaCapturePermission,
+    super.instanceManager,
+  }) : super.detached() {
     lastCreatedDelegate = this;
   }
   static CapturingUIDelegate lastCreatedDelegate = CapturingUIDelegate();

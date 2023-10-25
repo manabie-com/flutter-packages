@@ -143,6 +143,7 @@ void main() {
                     .path,
                 '--configuration=Debug',
                 '--skip-tests',
+                '--allow-warnings',
                 '--use-modular-headers',
                 '--use-libraries'
               ],
@@ -158,6 +159,7 @@ void main() {
                     .path,
                 '--configuration=Debug',
                 '--skip-tests',
+                '--allow-warnings',
                 '--use-modular-headers',
               ],
               packagesDir.path),
@@ -167,6 +169,60 @@ void main() {
       expect(output, contains('Linting plugin1.podspec'));
       expect(output, contains('Foo'));
       expect(output, contains('Bar'));
+    });
+
+    test('skips shim podspecs for the Flutter framework', () async {
+      final RepositoryPackage plugin = createFakePlugin(
+        'plugin1',
+        packagesDir,
+        extraFiles: <String>[
+          'example/ios/Flutter/Flutter.podspec',
+          'example/macos/Flutter/ephemeral/FlutterMacOS.podspec',
+        ],
+      );
+      _writeFakePodspec(plugin, 'macos');
+
+      final List<String> output =
+          await runCapturingPrint(runner, <String>['podspec-check']);
+
+      expect(output, isNot(contains('FlutterMacOS.podspec')));
+      expect(
+        processRunner.recordedCalls,
+        orderedEquals(<ProcessCall>[
+          ProcessCall('which', const <String>['pod'], packagesDir.path),
+          ProcessCall(
+              'pod',
+              <String>[
+                'lib',
+                'lint',
+                plugin
+                    .platformDirectory(FlutterPlatform.macos)
+                    .childFile('plugin1.podspec')
+                    .path,
+                '--configuration=Debug',
+                '--skip-tests',
+                '--allow-warnings',
+                '--use-modular-headers',
+                '--use-libraries'
+              ],
+              packagesDir.path),
+          ProcessCall(
+              'pod',
+              <String>[
+                'lib',
+                'lint',
+                plugin
+                    .platformDirectory(FlutterPlatform.macos)
+                    .childFile('plugin1.podspec')
+                    .path,
+                '--configuration=Debug',
+                '--skip-tests',
+                '--allow-warnings',
+                '--use-modular-headers',
+              ],
+              packagesDir.path),
+        ]),
+      );
     });
 
     test('fails if pod is missing', () async {
