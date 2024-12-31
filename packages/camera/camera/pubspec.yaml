@@ -23,12 +23,12 @@ flutter:
 dependencies:
   camera_android:
     git:
-      url: git@github.com:manabie-com/flutter-packages.git
+      url: https://github.com/manabie-com/flutter-packages.git
       path: packages/camera/camera_android
       ref: custom_camera_0.10.4
   camera_avfoundation:
     git:
-      url: git@github.com:manabie-com/flutter-packages.git
+      url: https://github.com/manabie-com/flutter-packages.git
       path: packages/camera/camera_avfoundation
       ref: custom_camera_0.10.4
   camera_platform_interface: ^2.4.0
